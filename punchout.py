@@ -1,3 +1,5 @@
+#!C:\Users\joswar\AppData\Local\Programs\Python\Python38-32\python.exe
+
 from tkinter import *
 from pdf2jpg import pdf2jpg
 from PIL import Image, ImageTk
@@ -8,16 +10,21 @@ class MainWindow(Frame):
     def __init__(self, *args, **kwargs):
         Frame.__init__(self, *args, **kwargs)        
         self.diag_container = Frame(self)        
-        self.diag_container.grid(row=0, column=0)
+        self.diag_container.pack(side='top', fill='x', expand=True, padx=10)
         self.preview_container = Frame(self)        
-        self.preview_container.grid(row=1, column=0)
+        self.preview_container.pack(fill='both', expand=True)
         self.crop_container = Frame(self)        
-        self.crop_container.grid(row=0, column=1, rowspan=2)
+        self.crop_container.pack(side='bottom', fill='x', expand=True, padx=10)
 
-        self.open_crop_button = Button(self.diag_container, text='Open Files to Crop', bg='lightblue')
-        self.open_crop_button.grid(row=0, column=0)
-        self.save_crop_button = Button(self.diag_container, text='Save Cropped Photos', bg='lightblue')
-        self.save_crop_button.grid(row=0, column=1) 
+        self.open_files_button = Button(self.diag_container, text='Open Files to Crop', bg='lightblue')
+        self.open_files_button.pack(side='left', fill='x', expand=1)
+        self.save_files_button = Button(self.diag_container, text='Save Cropped Photos', bg='lightblue')
+        self.save_files_button.pack(side='right', fill='x', expand=1)
+
+        self.vert_crop_button = Button(self.crop_container, text='Vertical Crop', bg='lightblue')
+        self.vert_crop_button.pack(side='left', fill='x', expand=1)
+        self.hori_crop_button = Button(self.crop_container, text='Horizontal Crop', bg='lightblue')
+        self.hori_crop_button.pack(side='right', fill='x', expand=1) 
 
         pdf2jpg.convert_pdf2jpg("C:/Users/joswar/Downloads/pdf_test.pdf", "C:/Users/joswar/Downloads/", dpi=300, pages="1")                
         im = Image.open("C:/Users/joswar/Downloads/sample.pdf_dir/0_sample.pdf.jpg")
@@ -28,7 +35,7 @@ class MainWindow(Frame):
         print(new_width, new_height)
         im = im.resize((new_width, new_height))
         ph = ImageTk.PhotoImage(im)
-        label = Label(self.crop_container, image=ph)
+        label = Label(self.preview_container, image=ph)
         label.image=ph
         label.pack()
         
@@ -43,6 +50,6 @@ if __name__ == '__main__':
     main = MainWindow(root)
     main.pack(side="top", fill="both", expand=True)
     root.iconbitmap("C:/Users/joswar/Projects/46_punch/box_gloves.ico")
-    root.wm_geometry("800x500")
+    root.wm_geometry("600x800")
     root.title("46 Punch")
     root.mainloop()
