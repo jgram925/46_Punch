@@ -1,3 +1,0 @@
-img2pdf==0.3.3
-pdf2jpg==1.0
-Pillow==6.2.1
