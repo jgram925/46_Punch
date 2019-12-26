@@ -3,7 +3,8 @@
 # pyGame for selecting image for punchout
 
 from pdf2image.exceptions import PDFInfoNotInstalledError, PDFPageCountError, PDFSyntaxError
-from tkinter.filedialog import askopenfilenames
+from tkinter.filedialog import askopenfilenames, askdirectory
+from tkinter.messagebox import showwarning
 from tkinter import *
 from pdf2image import convert_from_path
 from PIL import Image, ImageTk
@@ -13,23 +14,7 @@ import os
 
 class MainWindow(Frame):
     def __init__(self, *args, **kwargs):
-        Frame.__init__(self, *args, **kwargs)        
-        self.diag_container = Frame(self)        
-        self.diag_container.pack(side='top', fill='x', padx=10, pady=(10, 0))
-        self.preview_container = Frame(self)        
-        self.preview_container.pack(fill='both')
-        self.crop_container = Frame(self)        
-        self.crop_container.pack(side='bottom', fill='x', padx=10, pady=(0, 10))
-
-        self.open_files_button = Button(self.diag_container, text='Open Files to Crop', command=self.open_crop, bg='lightblue')
-        self.open_files_button.pack(side='left', fill='x', expand=1)
-        self.save_files_button = Button(self.diag_container, text='Save Cropped Photos', command=self.save_crop, bg='lightblue')
-        self.save_files_button.pack(side='right', fill='x', expand=1)
-
-        self.vert_crop_button = Button(self.crop_container, text='Vertical Crop', bg='lightblue')
-        self.vert_crop_button.pack(side='left', fill='x', expand=1)
-        self.hori_crop_button = Button(self.crop_container, text='Horizontal Crop', bg='lightblue')
-        self.hori_crop_button.pack(side='right', fill='x', expand=1) 
+        Frame.__init__(self, *args, **kwargs)
 
         # Temp Folder
         py_module = os.path.abspath(__file__)
@@ -44,25 +29,60 @@ class MainWindow(Frame):
         # Image Cycle Vars
         self.pdf_files = None
         self.image_files = []
-        self.current_image = 0        
+        self.current_image = 0
+        # Image Coord Vars
+        self.left = 0
+        self.top = 0
+        self.right = 0
+        self.bottom = 0
+
+        self.diag_container = Frame(self)        
+        self.diag_container.pack(side='top', fill='x', padx=10, pady=(10, 0))
+        self.preview_container = Frame(self)        
+        self.preview_container.pack(fill='both', pady=10)
+        self.preview_container.config(bg="black")
+
+        self.open_files_button = Button(self.diag_container, text='Open PDFs to Crop', command=self.open_crop, bg='lightblue')
+        self.open_files_button.pack(side='left', fill='x', expand=1)
+        self.save_files_button = Button(self.diag_container, text='Save Cropped Location', command=self.save_crop, bg='lightblue')
+        self.save_files_button.pack(side='right', fill='x', expand=1)
+        
+    def callme(self, event):        
+        self.left = event.x
+        self.top = event.y
+
+    def callyou(self, event):        
+        self.right = event.x
+        self.bottom = event.y        
+        
+    def callthis(self, event):
+        print(self.left, self.top, self.right, self.bottom)
+        save_this = self.image_to_display.crop((self.left, self.top, self.right, self.bottom))        
+        save_this.save("C:/Users/joswar/Desktop/test.jpg")
 
     def next_current_image(self):
         self.current_image = self.current_image + 1
 
     def display_image_method(self):
-        image_to_display = Image.open(self.image_files[self.current_image])        
-        width, height = image_to_display.size        
-        image_to_display = image_to_display.resize((math.ceil(width / 3), math.ceil(height / 3)))
-        display_img_tkinter = ImageTk.PhotoImage(image_to_display)
+        self.image_to_display = Image.open(self.image_files[self.current_image])        
+        width, height = self.image_to_display.size        
+        self.image_to_display = self.image_to_display.resize((math.ceil(width / 2), math.ceil(height / 2)))
+        display_img_tkinter = ImageTk.PhotoImage(self.image_to_display)
         if self.displayed_image:
             self.displayed_image.destroy()
             self.displayed_image = Label(self.preview_container, image=display_img_tkinter)      
             self.displayed_image.image=display_img_tkinter
             self.displayed_image.pack()
+            self.displayed_image.bind("<Button-1>", self.callme)
+            self.displayed_image.bind("<B1-Motion>", self.callyou)
+            self.displayed_image.bind("<ButtonRelease-1>", self.callthis)
         else:
             self.displayed_image = Label(self.preview_container, image=display_img_tkinter)
             self.displayed_image.image=display_img_tkinter
-            self.displayed_image.pack()            
+            self.displayed_image.pack()
+            self.displayed_image.bind("<Button-1>", self.callme)
+            self.displayed_image.bind("<B1-Motion>", self.callyou)
+            self.displayed_image.bind("<ButtonRelease-1>", self.callthis)
 
     def open_crop(self):
         self.image_files = []
@@ -77,13 +97,14 @@ class MainWindow(Frame):
         self.display_image_method()       
         
     def save_crop(self):
-        pass
+        self.save_directory = askdirectory()
+        showwarning('Save Location', f'Files with save to: {self.save_directory}')
 
 if __name__ == '__main__':
     root = Tk()    
     main = MainWindow(root)
     main.pack(side="top", fill="both", expand=True)
     root.iconbitmap("C:/Users/joswar/Projects/46_punch/box_gloves.ico")
-    root.wm_geometry("600x815")
+    root.wm_geometry("900x1165")
     root.title("46 Punch")
     root.mainloop()
