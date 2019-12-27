@@ -15,10 +15,7 @@ import os
 class MainWindow(Frame):
     def __init__(self, *args, **kwargs):
         Frame.__init__(self, *args, **kwargs)
-        
-        # Datetime        
-        self.datetime = datetime.datetime.now()        
-        self.date = self.datetime.strftime('%m%d%H%S')
+                
         # Project Folder & Temporary File Folder & Save Location
         py_module = os.path.abspath(__file__)
         self.py_module_path = os.path.dirname(py_module)
@@ -43,14 +40,12 @@ class MainWindow(Frame):
         self.button_container.pack(side='top', fill='x', padx=10, pady=(10, 0))        
         self.pdf_container = Canvas(self, width=850, height=1100)
         self.pdf_container.pack(pady=(10, 0))
-
         self.open_files_button = Button(self.button_container, text='Select PDFs & Save Location',
                                         command=self.open_save, font='Helvetica 12 bold', fg='white', bg='dark blue')
         self.open_files_button.pack(fill='x', expand=1)
         self.next_file_button = Button(self.button_container, text='Save Crop & Go To Next', 
                                        command=self.next_crop_image, font='Helvetica 12 bold', fg='white', bg='dark blue')
         self.next_file_button.pack(fill='x', expand=1)
-
         self.display_image_method()
 
     def open_save(self):
@@ -97,8 +92,10 @@ class MainWindow(Frame):
         
     def next_crop_image(self):                
         save_this = self.image_to_crop.crop((self.left, self.top, self.right, self.bottom))
-        filename = 'punchout-' + self.date + '.jpg'
-        save_this.save(os.path.join(self.save_directory, filename))
+        date_time = datetime.datetime.now()
+        date = date_time.strftime('%m%d%y-%H%S%f')
+        filename = 'punchout-' + date + '.jpg'
+        save_this.save(os.path.join(self.save_directory, filename), dpi=(300, 300))
         self.current_image = self.current_image + 1
         self.display_image_method()
 
